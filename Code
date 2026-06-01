@@ -1,0 +1,120 @@
+function onOpen(){
+  const ui = DocumentApp.getUi();
+
+  var subMenu = ui.createMenu('⚙️ Saves / Backups')
+    .addItem('💾 Save Doc','saveDocumentContent')
+    .addItem('✏️ Auto re-write','autoWriteContent')
+
+  ui.createMenu('External Tools')
+    .addItem('Input codes','cheatCodes')
+    .addSeparator()
+    .addSubMenu(subMenu)
+    .addToUi(); // Recorda afegir sempre .addToUi() al final per registrar el menú
+}
+
+function cheatCodes(){
+  var ui = DocumentApp.getUi();
+    
+  // Mostra un quadre on l'usuari pot escriure
+  var resposta = ui.prompt('Enter code:', 'Enter codes here:', ui.ButtonSet.OK_CANCEL);
+  
+  // Comprova si l'usuari ha premut "OK"
+  if (resposta.getSelectedButton() == ui.Button.OK) {
+    var textEscrit = resposta.getResponseText().trim(); // Guardem el text original (treient espais accidentals)
+    var textMinuscules = textEscrit.toLowerCase();       // Creem una còpia en minúscules només per als codis que ho requereixin
+    
+    // CONDICIONALS IF AMB ELS TEUS CODIS SECRETS
+    if (textMinuscules === "1234") {
+      importImage();
+    } 
+    else if (textEscrit === "aCrectionMIAU"){ // Ara es mantenen les majúscules correctament
+      correctA();
+    }
+    else if (textEscrit === "uCrectionGUAU"){
+      correctU();
+    }
+    else if (textEscrit === "url1ns3rt10n"){
+      importUrl();
+    }
+    else if (textEscrit === "showCodes"){
+      showCodes();
+    }
+    else {
+      ui.alert('You wrote: "' + textEscrit + '", but it isn\'t a valid code.');
+    }
+  }
+}
+
+function showCodes(){
+  var ui = DocumentApp.getUi();
+  ui.alert("Codes: 1234    //    aCrectionMIAU    //    uCrectionGUAU    //    url1ns3rt10n")
+}
+
+function correctA(){
+  const body = DocumentApp.getActiveDocument().getBody();
+  const ui = DocumentApp.getUi();
+
+  body.replaceText('A',' MIAU ');
+  body.replaceText('a',' MIAU ');
+
+  ui.alert("MIAUcorrected your text");
+}
+
+function correctU(){
+  const body = DocumentApp.getActiveDocument().getBody();
+  const ui = DocumentApp.getUi();
+
+  body.replaceText('U',' GUAU ');
+  body.replaceText('u',' GUAU ');
+
+  ui.alert("GUAUcorrected your text");
+}
+
+function importImage() {
+  const url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTV5wor-qYjeen4ErOI5G79iu2nfgQeoAmQfg&s";
+  
+  try {
+    const imatgeBlob = UrlFetchApp.fetch(url).getBlob();
+    const body = DocumentApp.getActiveDocument().getBody();
+    body.appendImage(imatgeBlob);
+  } catch (error) {
+    DocumentApp.getUi().alert("❌ Error en importar la imatge: " + error.toString());
+  }
+}
+
+function importUrl() {
+  const url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  
+  try {
+    const body = DocumentApp.getActiveDocument().getBody();
+    const paragraf = body.appendParagraph(url);
+    paragraf.setLinkUrl(url);
+  } catch (error) {
+    DocumentApp.getUi().alert("❌ Error en enganxar l'enllaç: " + error.toString());
+  }
+}
+
+//===========================================
+// DON'T TOUCH ANYTHING BELOW THIS TEXT
+//===========================================
+
+function saveDocumentContent() {
+  const doc = DocumentApp.getActiveDocument();
+  const text = doc.getBody().getText();
+  
+  PropertiesService.getDocumentProperties().setProperty('SAVED_TEXT', text);
+  DocumentApp.getUi().alert("💾 Còpia de seguretat desada correctament!");
+}
+
+function autoWriteContent() {
+  const savedText = PropertiesService.getDocumentProperties().getProperty('SAVED_TEXT');
+  
+  if (!savedText) {
+    DocumentApp.getUi().alert("❌ No s'ha trobat cap text desat.");
+    return;
+  }
+  
+  const body = DocumentApp.getActiveDocument().getBody();
+  body.appendParagraph("\n--- Text Recuperat ---\n" + savedText);
+  DocumentApp.getUi().alert("✏️ El text s'ha recuperat i s'ha escrit al final.");
+}
